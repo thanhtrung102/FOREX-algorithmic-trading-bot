@@ -12,3 +12,30 @@ BUY = 1
 NONE = 0
 
 MONGO_CONN_STR = "mongodb+srv://admin:13122003abc@cluster0.oyqmo.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+
+# Timeframe mappings for investing.com API (seconds)
+TFS = {
+    'M1': 60,
+    'M5': 300,
+    'M15': 900,
+    'M30': 1800,
+    'H1': 3600,
+    'H4': 14400,
+    'D': 86400,
+    'W': 604800,
+}
+
+# Investing.com pair IDs for scraping
+INVESTING_COM_PAIRS = {
+    'EUR_USD': {'pair_id': 1},
+    'GBP_USD': {'pair_id': 2},
+    'USD_JPY': {'pair_id': 3},
+    'USD_CHF': {'pair_id': 4},
+    'AUD_USD': {'pair_id': 5},
+    'USD_CAD': {'pair_id': 7},
+    'NZD_USD': {'pair_id': 8},
+    'EUR_GBP': {'pair_id': 6},
+    'EUR_JPY': {'pair_id': 9},
+    'GBP_JPY': {'pair_id': 10},
+    'EUR_CHF': {'pair_id': 11},
+}

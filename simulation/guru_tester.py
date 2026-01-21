@@ -35,10 +35,13 @@ def apply_signals(df, PROFIT_FACTOR, sig):
     df["SL"] = df.apply(apply_stop_loss, axis=1)
 
 def create_signals(df, time_d=1):
-    df_signals = df[df.SIGNAL != NONE].copy() 
+    df_signals = df[df.SIGNAL != NONE].copy()
     df_signals['m5_start'] = [x + dt.timedelta(hours=time_d) for x in df_signals.time]
-    df_signals.drop(['time', 'mid_o', 'mid_h', 'mid_l', 'bid_o', 'bid_h', 'bid_l',
-    'ask_o', 'ask_h', 'ask_l', 'direction'], axis=1, inplace=True)
+    # Drop columns that exist (direction may not always be present)
+    cols_to_drop = ['time', 'mid_o', 'mid_h', 'mid_l', 'bid_o', 'bid_h', 'bid_l',
+                    'ask_o', 'ask_h', 'ask_l', 'direction']
+    cols_to_drop = [c for c in cols_to_drop if c in df_signals.columns]
+    df_signals.drop(cols_to_drop, axis=1, inplace=True)
     df_signals.rename(columns={
         'bid_c' : 'start_price_BUY',
         'ask_c' : 'start_price_SELL',

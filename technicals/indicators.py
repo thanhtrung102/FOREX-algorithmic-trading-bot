@@ -1,14 +1,37 @@
 import pandas as pd
 
+
 def BollingerBands(df: pd.DataFrame, n=20, s=2):
-    typical_p = ( df.mid_c + df.mid_h + df.mid_l ) / 3
+    """
+    Calculate Bollinger Bands.
+
+    Args:
+        df: DataFrame with mid_c, mid_h, mid_l columns
+        n: Period for moving average (default 20)
+        s: Number of standard deviations (default 2)
+
+    Returns:
+        DataFrame with BB_MA, BB_UP, BB_LW columns added
+    """
+    typical_p = (df.mid_c + df.mid_h + df.mid_l) / 3
     stddev = typical_p.rolling(window=n).std()
     df['BB_MA'] = typical_p.rolling(window=n).mean()
     df['BB_UP'] = df['BB_MA'] + stddev * s
     df['BB_LW'] = df['BB_MA'] - stddev * s
     return df
 
+
 def ATR(df: pd.DataFrame, n=14):
+    """
+    Calculate Average True Range.
+
+    Args:
+        df: DataFrame with mid_h, mid_l, mid_c columns
+        n: Period (default 14)
+
+    Returns:
+        DataFrame with ATR_{n} column added
+    """
     prev_c = df.mid_c.shift(1)
     tr1 = df.mid_h - df.mid_l
     tr2 = abs(df.mid_h - prev_c)
@@ -17,7 +40,19 @@ def ATR(df: pd.DataFrame, n=14):
     df[f"ATR_{n}"] = tr.rolling(window=n).mean()
     return df
 
+
 def KeltnerChannels(df: pd.DataFrame, n_ema=20, n_atr=10):
+    """
+    Calculate Keltner Channels.
+
+    Args:
+        df: DataFrame with mid_c, mid_h, mid_l columns
+        n_ema: EMA period (default 20)
+        n_atr: ATR period (default 10)
+
+    Returns:
+        DataFrame with EMA, KeUp, KeLo columns added
+    """
     df['EMA'] = df.mid_c.ewm(span=n_ema, min_periods=n_ema).mean()
     df = ATR(df, n=n_atr)
     c_atr = f"ATR_{n_atr}"
@@ -28,11 +63,21 @@ def KeltnerChannels(df: pd.DataFrame, n_ema=20, n_atr=10):
 
 
 def RSI(df: pd.DataFrame, n=14):
+    """
+    Calculate Relative Strength Index.
+
+    Args:
+        df: DataFrame with mid_c column
+        n: Period (default 14)
+
+    Returns:
+        DataFrame with RSI_{n} column added
+    """
     alpha = 1.0 / n
     gains = df.mid_c.diff()
 
-    wins = pd.Series([ x if x >= 0 else 0.0 for x in gains ], name="wins")
-    losses = pd.Series([ x * -1 if x < 0 else 0.0 for x in gains ], name="losses")
+    wins = pd.Series([x if x >= 0 else 0.0 for x in gains], name="wins")
+    losses = pd.Series([x * -1 if x < 0 else 0.0 for x in gains], name="losses")
 
     wins_rma = wins.ewm(min_periods=n, alpha=alpha).mean()
     losses_rma = losses.ewm(min_periods=n, alpha=alpha).mean()
@@ -42,8 +87,20 @@ def RSI(df: pd.DataFrame, n=14):
     df[f"RSI_{n}"] = 100.0 - (100.0 / (1.0 + rs))
     return df
 
-def MACD(df: pd.DataFrame, n_slow=26, n_fast=12, n_signal=9):
 
+def MACD(df: pd.DataFrame, n_slow=26, n_fast=12, n_signal=9):
+    """
+    Calculate MACD (Moving Average Convergence Divergence).
+
+    Args:
+        df: DataFrame with mid_c column
+        n_slow: Slow EMA period (default 26)
+        n_fast: Fast EMA period (default 12)
+        n_signal: Signal line period (default 9)
+
+    Returns:
+        DataFrame with MACD, SIGNAL, HIST columns added
+    """
     ema_long = df.mid_c.ewm(min_periods=n_slow, span=n_slow).mean()
     ema_short = df.mid_c.ewm(min_periods=n_fast, span=n_fast).mean()
 
@@ -52,32 +109,3 @@ def MACD(df: pd.DataFrame, n_slow=26, n_fast=12, n_signal=9):
     df['HIST'] = df.MACD - df.SIGNAL
 
     return df
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
